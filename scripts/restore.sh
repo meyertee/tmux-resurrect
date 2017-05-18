@@ -124,6 +124,10 @@ new_window() {
 	else
 		tmux new-window -d -t "${session_name}:${window_number}" -n "$window_name" -c "$dir"
 	fi
+	if [[ ! -z $dir ]]; then
+		sleep 1
+		tmux send-keys -t "${session_name}:${window_number}" C-z "cd $dir" Enter
+	fi
 }
 
 new_session() {
@@ -144,6 +148,10 @@ new_session() {
 	if [ $created_window_num -ne $window_number ]; then
 		tmux move-window -s "${session_name}:${created_window_num}" -t "${session_name}:${window_number}"
 	fi
+	if [[ ! -z $dir ]]; then
+		sleep 1
+		tmux send-keys -t "${session_name}:${window_number}" C-z "cd $dir" Enter
+	fi
 }
 
 new_pane() {
@@ -158,6 +166,10 @@ new_pane() {
 		tmux split-window -t "${session_name}:${window_number}" -c "$dir" "$pane_creation_command"
 	else
 		tmux split-window -t "${session_name}:${window_number}" -c "$dir"
+	fi
+	if [[ ! -z $dir ]]; then
+		sleep 1
+		tmux send-keys -t "${session_name}:${window_number}.${pane_index}" C-z "cd $dir" Enter
 	fi
 	# minimize window so more panes can fit
 	tmux resize-pane  -t "${session_name}:${window_number}" -U "999"
@@ -180,6 +192,10 @@ restore_pane() {
 				# Pane exists, no need to create it!
 				# Pane existence is registered. Later, its process also won't be restored.
 				register_existing_pane "$session_name" "$window_number" "$pane_index"
+				if [[ ! -z $dir ]]; then
+					sleep 1
+					tmux send-keys -t "${session_name}:${window_number}.${pane_index}" C-z "cd $dir" Enter
+				fi
 			fi
 		elif window_exists "$session_name" "$window_number"; then
 			new_pane "$session_name" "$window_number" "$window_name" "$dir" "$pane_index"
